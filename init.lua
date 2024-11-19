@@ -3,7 +3,14 @@
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+-- Set to true if you have a Nerd Font installed and selected in the terminal
+vim.g.have_nerd_font = false
 
+-- Set <space> as the leader key
+-- See `:help mapleader`
+--  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
+vim.g.mapleader = ' '
+vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
@@ -78,12 +85,13 @@ vim.opt.scrolloff = 10
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- Diagnostic keymaps 
+-- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- Diag
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -97,15 +105,51 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+-- Mapping for selecting text using Ctrl + Shift + Arrow Keys in insert mode
+-- Function to switch temporarily to normal mode and return to insert mode
+-- Function to switch temporarily to normal mode and return to insert mode
+local function temp_normal_mode(key)
+  return '<C-o>' .. key
+end
 
+-- Mappings for Alt + h, j, k, l in insert mode
+vim.keymap.set('i', '<A-h>', temp_normal_mode 'h', { noremap = true, silent = true })
+vim.keymap.set('i', '<A-j>', temp_normal_mode 'j', { noremap = true, silent = true })
+vim.keymap.set('i', '<A-k>', temp_normal_mode 'k', { noremap = true, silent = true })
+vim.keymap.set('i', '<A-l>', temp_normal_mode 'l', { noremap = true, silent = true })
+
+-- Mappings for Alt + Ctrl + h/l for word navigation in insert mode
+-- Go to the beginning of the current word (Alt + Ctrl + h)
+vim.keymap.set('i', '<A-C-h>', temp_normal_mode 'b', { noremap = true, silent = true })
+
+-- Go to the end of the current word (Alt + Ctrl + l)
+vim.keymap.set('i', '<A-C-l>', temp_normal_mode 'e', { noremap = true, silent = true })
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
---  See `:help wincmd` for a list of all window commands
+--  See `:help wincmd` for a likst of all window commands
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-j>', '<C-w>j<C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- Go to the beginning of the current word (Ctrl + Shift + h)
+vim.keymap.set('i', '<A-S-h>', '<C-o>b', { noremap = true, silent = true })
+
+-- go to the end of the next word (ctrl + shift + l)
+vim.keymap.set('i', '<A-S-l>', '<c-o>w', { noremap = true, silent = true })
+
+-- select text from the cursor to the left (ctrl + shift + h)
+vim.keymap.set('i', '<A-S-h>', '<c-o>vb', { noremap = true, silent = true })
+
+-- select text from the cursor to the right (ctrl + shift + l)
+vim.keymap.set('i', '<A-S-l>', '<c-o>vwe', { noremap = true, silent = true })
+
+-- move to the previous line while selecting text (ctrl + shift + k)
+vim.keymap.set('i', '<A-S-k>', '<c-o>v<up>', { noremap = true, silent = true })
+
+-- Move to the next line while selecting text (Ctrl + Shift + j)
+vim.keymap.set('i', '<A-S-j>', '<C-o>v<Down>', { noremap = true, silent = true })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -700,11 +744,11 @@ require('lazy').setup({
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
           --  This will expand snippets if the LSP sent a snippet.
-          ['<C-y>'] = cmp.mapping.confirm { select = true },
+          --['<C-y>'] = cmp.mapping.confirm { select = true },
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
+          ['<Tab>'] = cmp.mapping.confirm { select = true },
           --['<Tab>'] = cmp.mapping.select_next_item(),
           --['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
@@ -713,6 +757,7 @@ require('lazy').setup({
           --  completions whenever it has completion options available.
           ['<C-Space>'] = cmp.mapping.complete {},
 
+          --
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  So if you have a snippet that's like:
           --  function $name($args)
@@ -847,7 +892,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend klseymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
